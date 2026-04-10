@@ -9,30 +9,24 @@
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: sans-serif; overflow: hidden; background: #f0f0f0; }
         .screen { display: none; width: 100vw; height: 100vh; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         .active { display: flex; }
-        canvas { background: white; border: 1px solid #ccc; max-width: 90%; max-height: 70%; }
+        canvas { background: white; border: 1px solid #ccc; max-width: 90%; max-height: 60%; }
         .grid-container { display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr); gap: 5px; width: 90vh; height: 90vh; max-width: 95vw; max-height: 95vw; }
         .square { background: #888; display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; color: white; border-radius: 4px; padding: 5px; box-sizing: border-box; transition: background 0.3s; }
         .square.revealed { background: #4CAF50; }
         .reward-points { font-size: 1.4rem; margin-bottom: 2px; }
         .reward-desc { font-size: 0.7rem; line-height: 1.1; font-weight: normal; }
-        .leaderboard-container { width: 80%; height: 60%; position: relative; margin: 15px 0; }
+        .leaderboard-container { width: 80%; height: 50%; position: relative; margin: 15px 0; }
         button { padding: 15px 35px; font-size: 1.2rem; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; margin-top: 20px; }
         button:hover { background: #0056b3; }
         button:disabled { background: #ccc; cursor: not-allowed; }
         input { padding: 10px; font-size: 1.1rem; width: 250px; margin-bottom: 10px; }
         #distractorInput { width: 150px; font-size: 1.3rem; margin-top: 20px; }
         
-        /* New styles for rewards list */
-        .rewards-list { text-align: left; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 15px; max-width: 400px; }
+        /* New Styles for Avatar and Rewards */
+        .avatar-img { width: 200px; height: auto; margin-bottom: 20px; }
+        .rewards-list { background: white; padding: 20px; border-radius: 10px; border: 1px solid #ccc; text-align: left; max-width: 500px; margin-top: 20px; width: 100%; }
         .reward-item { border-bottom: 1px solid #eee; padding: 5px 0; font-size: 0.9rem; }
-
-        /* Styles for the image avatar */
-        .avatar-img {
-            max-width: 200px; /* Adjust size as needed */
-            max-height: 200px;
-            margin-bottom: 20px;
-            object-fit: contain; /* Preserve aspect ratio */
-        }
+        .total-box { font-size: 1.5rem; font-weight: bold; color: #007bff; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -45,7 +39,7 @@
 </div>
 
 <div id="screen2" class="screen">
-    <img src="https://example.com/api/files/download/wY3wXb9q/backpacking-silhouette_2.png" id="avatarImg" class="avatar-img" alt="College Student Avatar">
+    <img src="https://example.com/api/files/download/wY3wXb9q/backpacking-silhouette_2.png" class="avatar-img" alt="Student Avatar">
     <div id="avatarText" style="max-width: 600px; margin-top: 20px;"></div>
     <button onclick="nextScreen()">Continue</button>
 </div>
@@ -85,22 +79,20 @@
     <button onclick="nextScreen()">Start Round 2</button>
 </div>
 
-<div id="screen-final" class="screen">
+<div id="screen10" class="screen">
     <h1>Thank you for your participation!</h1>
-    <img src="https://example.com/api/files/download/wY3wXb9q/backpacking-silhouette_2.png" id="finalAvatarImg" class="avatar-img" alt="College Student Avatar">
-    <div id="finalRewardsContainer" class="rewards-list">
-        <h3>Rewards You Earned:</h3>
-        <div id="rewardsListItems"></div>
-        <p><strong>Total Points: <span id="finalTotalScore"></span></strong></p>
+    <img src="https://example.com/api/files/download/wY3wXb9q/backpacking-silhouette_2.png" class="avatar-img" alt="Student Avatar">
+    
+    <div class="rewards-list">
+        <h3>Summary of Earned Rewards:</h3>
+        <div id="rewardSummaryList"></div>
+        <div class="total-box">Total Score: <span id="finalTotalScore">0</span></div>
     </div>
 </div>
 
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyUZq_EUriDTD0gLgfn3dcgOu5Slbxl7nzdmGOiqdkBUANBy5pjLbZM9kT_vh37fQdr/exec";
     
-    // Path to the backpacker image
-    const AVATAR_IMAGE_SRC = "https://example.com/api/files/download/wY3wXb9q/backpacking-silhouette_2.png";
-
     const REWARD_DATA = {
         20: "Night out with friends",
         15: "Giftcard to favorite place to eat on campus",
@@ -116,7 +108,7 @@
         clicksRemaining: 20,
         round1Score: 0,
         round2Score: 0,
-        earnedRewards: [], // Tracks description of every reward found
+        earnedList: [], // Track descriptions of rewards found
         historicalData: [], 
         masterRewardMap: [],
         distractorCountDown: 15
@@ -168,8 +160,6 @@
         const s = state.currentScreen;
         if (s === 2) {
             showScreen('screen2');
-            // Ensure the image src is set correctly for screen 2
-            document.getElementById('avatarImg').src = AVATAR_IMAGE_SRC;
             document.getElementById('avatarText').innerText = "Imagine this is you. You are a college student trying to gain rewards. Rewards have different point values.";
         } 
         else if (s === 3) {
@@ -199,7 +189,7 @@
             showScreen('screen-leaderboard');
             document.getElementById('leaderboardTitle').innerText = "Final Leaderboard";
             renderChart('mainChart', true);
-            document.getElementById('finalMessage').innerText = "Round 2 complete. Click below to see your results.";
+            document.getElementById('finalMessage').innerText = "Click continue to see your final rewards.";
             saveData(); 
         }
         else if (s === 10) {
@@ -207,56 +197,18 @@
         }
     }
 
-    /*
-    The original drawAvatar function is no longer needed
-    and has been removed, as we are now using a static image.
-    */
-
-    function startRound(num) {
-        state.round = num;
-        state.clicksRemaining = 20;
-        showScreen('screen-game');
-        const grid = document.getElementById('grid');
-        grid.innerHTML = '';
-        state.masterRewardMap.forEach(val => {
-            const sq = document.createElement('div');
-            sq.className = 'square';
-            sq.onclick = () => {
-                if (state.clicksRemaining > 0 && !sq.classList.contains('revealed')) {
-                    state.clicksRemaining--;
-                    state.earnedRewards.push(REWARD_DATA[val]);
-                    if (state.round === 1) state.round1Score += val;
-                    else state.round2Score += val;
-                    sq.innerHTML = `<div class="reward-points">${val}</div><div class="reward-desc">${REWARD_DATA[val]}</div>`;
-                    sq.classList.add('revealed');
-                    setTimeout(() => { sq.innerHTML = ''; sq.classList.remove('revealed'); }, 1000);
-                    if (state.clicksRemaining === 0) setTimeout(nextScreen, 1200);
-                }
-            };
-            grid.appendChild(sq);
-        });
-    }
-
     function showFinalScreen() {
-        showScreen('screen-final');
-        // Ensure the image src is set correctly for the final screen
-        document.getElementById('finalAvatarImg').src = AVATAR_IMAGE_SRC;
-        
-        const listContainer = document.getElementById('rewardsListItems');
-        listContainer.innerHTML = '';
-        
-        // Get unique rewards and count them for a cleaner list
-        const counts = {};
-        state.earnedRewards.forEach(r => counts[r] = (counts[r] || 0) + 1);
-        
-        for (const [reward, count] of Object.entries(counts)) {
-            const item = document.createElement('div');
-            item.className = 'reward-item';
-            item.innerHTML = `• ${reward} (x${count})`;
-            listContainer.appendChild(item);
-        }
-        
+        showScreen('screen10');
         document.getElementById('finalTotalScore').innerText = state.round1Score + state.round2Score;
+        const listDiv = document.getElementById('rewardSummaryList');
+        
+        // Group rewards to show counts (e.g., "You got an A on an assignment x 4")
+        const counts = {};
+        state.earnedList.forEach(item => counts[item] = (counts[item] || 0) + 1);
+        
+        listDiv.innerHTML = Object.entries(counts)
+            .map(([desc, count]) => `<div class="reward-item"><strong>${count}x</strong> ${desc}</div>`)
+            .join('');
     }
 
     function checkDistractorInput() {
@@ -278,18 +230,40 @@
 
     function showScreen(id) { document.getElementById(id).classList.add('active'); }
 
+    function startRound(num) {
+        state.round = num;
+        state.clicksRemaining = 20;
+        showScreen('screen-game');
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+        state.masterRewardMap.forEach(val => {
+            const sq = document.createElement('div');
+            sq.className = 'square';
+            sq.onclick = () => {
+                if (state.clicksRemaining > 0 && !sq.classList.contains('revealed')) {
+                    state.clicksRemaining--;
+                    state.earnedList.push(REWARD_DATA[val]);
+                    if (state.round === 1) state.round1Score += val;
+                    else state.round2Score += val;
+                    sq.innerHTML = `<div class="reward-points">${val}</div><div class="reward-desc">${REWARD_DATA[val]}</div>`;
+                    sq.classList.add('revealed');
+                    setTimeout(() => { sq.innerHTML = ''; sq.classList.remove('revealed'); }, 1000);
+                    if (state.clicksRemaining === 0) setTimeout(nextScreen, 1200);
+                }
+            };
+            grid.appendChild(sq);
+        });
+    }
+
     function renderChart(canvasId, showUser) {
         const canvas = document.getElementById(canvasId);
         const ctx = canvas.getContext('2d');
         let displayList = [...state.historicalData];
         let score = (state.round === 1 && state.currentScreen < 8) ? state.round1Score : state.round2Score;
-        
         if (showUser) displayList.push({ id: state.participantId + " (YOU)", score: score, isUser: true });
         displayList.sort((a, b) => b.score - a.score);
-        
         if (window.myCharts && window.myCharts[canvasId]) window.myCharts[canvasId].destroy();
         if (!window.myCharts) window.myCharts = {};
-        
         window.myCharts[canvasId] = new Chart(ctx, {
             type: 'bar',
             data: {
