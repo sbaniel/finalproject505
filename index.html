@@ -25,6 +25,7 @@
         /* New styles for rewards list */
         .rewards-list { text-align: left; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 15px; max-width: 400px; }
         .reward-item { border-bottom: 1px solid #eee; padding: 5px 0; font-size: 0.9rem; }
+        .avatar-img { max-width: 150px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -37,7 +38,7 @@
 </div>
 
 <div id="screen2" class="screen">
-    <canvas id="avatarCanvas"></canvas>
+    <img src="https://example.com/api/files/download/wY3wXb9q/backpacking-silhouette_2.png" class="avatar-img" alt="College Student Avatar">
     <div id="avatarText" style="max-width: 600px; margin-top: 20px;"></div>
     <button onclick="nextScreen()">Continue</button>
 </div>
@@ -79,7 +80,7 @@
 
 <div id="screen-final" class="screen">
     <h1>Thank you for your participation!</h1>
-    <canvas id="finalAvatarCanvas"></canvas>
+    <img src="https://example.com/api/files/download/wY3wXb9q/backpacking-silhouette_2.png" class="avatar-img" alt="College Student Avatar">
     <div id="finalRewardsContainer" class="rewards-list">
         <h3>Rewards You Earned:</h3>
         <div id="rewardsListItems"></div>
@@ -157,7 +158,6 @@
         const s = state.currentScreen;
         if (s === 2) {
             showScreen('screen2');
-            drawAvatar('avatarCanvas');
             document.getElementById('avatarText').innerText = "Imagine this is you. You are a college student trying to gain rewards. Rewards have different point values.";
         } 
         else if (s === 3) {
@@ -195,39 +195,6 @@
         }
     }
 
-    function drawAvatar(canvasId) {
-        const canvas = document.getElementById(canvasId);
-        const ctx = canvas.getContext('2d');
-        canvas.width = 300; canvas.height = 300;
-        
-        // Backpack (behind student)
-        ctx.fillStyle = "#444";
-        ctx.fillRect(105, 140, 90, 100);
-
-        // Head
-        ctx.beginPath(); ctx.arc(150, 70, 40, 0, Math.PI * 2);
-        ctx.fillStyle = "#e0ac69"; ctx.fill();
-
-        // Hoodie/Torso
-        ctx.fillStyle = "#556677"; 
-        ctx.beginPath();
-        ctx.moveTo(110, 110);
-        ctx.lineTo(190, 110);
-        ctx.lineTo(210, 250);
-        ctx.lineTo(90, 250);
-        ctx.closePath();
-        ctx.fill();
-
-        // Hoodie Pocket
-        ctx.strokeStyle = "#fff";
-        ctx.strokeRect(125, 180, 50, 30);
-
-        // Legs (Jeans)
-        ctx.fillStyle = "#223366";
-        ctx.fillRect(110, 250, 35, 40);
-        ctx.fillRect(155, 250, 35, 40);
-    }
-
     function startRound(num) {
         state.round = num;
         state.clicksRemaining = 20;
@@ -240,6 +207,7 @@
             sq.onclick = () => {
                 if (state.clicksRemaining > 0 && !sq.classList.contains('revealed')) {
                     state.clicksRemaining--;
+                    // Store the reward name
                     state.earnedRewards.push(REWARD_DATA[val]);
                     if (state.round === 1) state.round1Score += val;
                     else state.round2Score += val;
@@ -255,8 +223,6 @@
 
     function showFinalScreen() {
         showScreen('screen-final');
-        drawAvatar('finalAvatarCanvas');
-        
         const listContainer = document.getElementById('rewardsListItems');
         listContainer.innerHTML = '';
         
